@@ -4,17 +4,12 @@ import torch.nn.functional as F
 import numpy as np
 
 ########### Reference #############
-n_vocab: len(vocab)
-n_seq: 256
-n_layer: 6
-d_model: 512
-# "i_pad": 0
-# "d_ff": 1024
-n_head: 8
-d_head: 64
-# "dropout": 0.1
-# "layer_norm_epsilon": 1e-12
-
+n_vocab= len(vocab)
+n_seq= 256
+n_layer= 6
+d_model= 512
+n_head= 8
+d_head= 64
 ###################################
 
 def positional_encoding(n_seq, d_model):
@@ -37,7 +32,7 @@ class scaled_dotproduct_attention(nn.Module):
     def forward(self, Q, K, V, mask):
         score = torch.mm(Q, K.transpose(1, 0)).mul_(self.scale)
         if mask is not None:
-            score += mask * (-1e-9)
+            score.masked_fill_(mask, -1e9)
         attention_prob = F.softmax(score, dim=1)
         context = torch.mm(attention_prob, V)
 
@@ -70,11 +65,17 @@ class multihead_attention(nn.Module):
 
         return output, attention_prob
 
-def get_attention_mask():
-    return None
+def get_attention_mask(seq_q, seq_k):
+    batch_size, len_q = seq_q.size()
+    batch_size, len_k = seq_k.size()
+    pad_attn_mask = seq_q.data.eq(0)
+    pad_attn_mask = pad_attn_mask.unsqueeze(1).expand(batch_size, len_q, len_k)
+    return pad_attn_mask
 
-def get_decoder_mask():
-    return None
+def get_decoder_mask(seq):
+    decoder_mask = torch.ones_like(seq).unsqueeze(-1).expand(seq.size(0), seq.size(1), seq.size(1))
+    decoder_mask = decoder_mask.triu(diagonal=1)
+    return decoder_mask
 
 class FFNN(nn.Module):
     def __init__(self, d_model):
@@ -96,10 +97,10 @@ class encoder_layer(nn.Module):
         self.linear = FFNN(d_model)
 
     def forward(self, x, mask):
-        out, attn_prob = self.multihead_attention(x,x,x, mask)
+        out, attn_prob = self.multihead_attention(x,x,x, mask) # self-attention
         x = self.layernorm(x+out)
-        x += self.linear(x)
-        x = self.layernorm(x)
+        out = self.linear(x)
+        x = self.layernorm(x+out)
 
     return x, attn_prob
 
