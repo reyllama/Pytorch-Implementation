@@ -7,3 +7,6 @@
 1. GAN
 2. WGAN
 3. CycleGAN
+4. Character-level LSTM
+5. Word-level LSTM
+6. Transformer (Attention is All You Need)
