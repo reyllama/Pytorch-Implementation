@@ -4,12 +4,12 @@ import torch.nn.functional as F
 import numpy as np
 
 ########### Reference #############
-n_vocab= len(vocab)
-n_seq= 256
-n_layer= 6
-d_model= 512
-n_head= 8
-d_head= 64
+n_vocab = len(vocab)
+n_seq = 256
+n_layer = 6
+d_model = 512
+n_head = 8
+d_head = 64
 ###################################
 
 def positional_encoding(n_seq, d_model):
