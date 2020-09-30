@@ -10,3 +10,4 @@
 4. Character-level LSTM
 5. Word-level LSTM
 6. Transformer (Attention is All You Need)
+7. Variational Auto-Encoder
