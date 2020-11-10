@@ -95,7 +95,7 @@ class Trainer:
         self.start_time = time.time()
         self.discriminator, self.generator = init_model(self.latent_size, self.start_channel_size, self.image_channels)
         self.init_running_average_generator()
-        self.criterion = loiss.WGANLoss(self.discriminator, self.generator, self.opt_level)
+        self.criterion = loss.WGANLoss(self.discriminator, self.generator, self.opt_level)
         self.logger = logger.Logger(config.summaries_dir, config.generated_data_dir)
         self.num_skipped_steps = 0
         if not self.load_checkpoint(): # First time
@@ -115,5 +115,3 @@ class Trainer:
         self.dataloader_train = load_dataset(
             self.dataset, self.batch_size, self.current_imsize, self.full_validation, self.load_fraction_of_dataset
         )
-
-    
