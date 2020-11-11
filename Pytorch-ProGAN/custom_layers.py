@@ -19,7 +19,7 @@ class WSConv2d(nn.Module):
         # Calculate weight scale
         convShape = list(self.conv.weight.shape)
         fanIn = np.prod(convShape[1:]) # Leave out number of op filters (What's op filters?)
-        self.wtScale = gain/np.sqrt(fanIn) # gain = sqrt(2)
+        self.wtScale = gain/np.sqrt(fanIn) # gain = sqrt(2), hard coded for leaky-relu (He initialization)
 
         # initialize
         nn.init.normal_(self.conv.weight)

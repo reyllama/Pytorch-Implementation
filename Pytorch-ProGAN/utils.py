@@ -54,4 +54,4 @@ def compute_transition_value(global_step, is_transitioning, transition_iters, la
 
 def get_transition_value(x_old, x_new, transition_variable):
     assert x_old.shape == x_new.shape, "Old shape: {} / New shape: {}".format(x_old.shape, x_new.shape)
-    return torch.lerp(x_old, x_new, transition_variable) # Linear Interpolation. Weight=transition_variable
+    return torch.lerp(x_old, x_new, transition_variable) # Linear Interpolation. Weight=transition_variable / out = start + w * (end - start)

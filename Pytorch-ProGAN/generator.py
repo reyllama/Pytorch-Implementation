@@ -22,18 +22,18 @@ class LatentReshape(nn.Module):
 
 class Generator(ProgressiveBaseModel):
     def __init__(self, start_channel_dim, img_channels, latent_size):
-        super().__init__(start_channel_dim, img_channels)
+        super().__init__(start_channel_dim, img_channels) # Execute __init__ method in parent (ProgressiveBaseModel)
         # Transition Blocks
         self.latent_size = latent_size
-        self.to_rgb_new = WSConv2d(start_channel_dim, self.image_channels, 1, 0)
+        self.to_rgb_new = WSConv2d(start_channel_dim, self.image_channels, 1, 0) # 1x1 convolution to switch to 3 channel image (RGB)
         self.to_rgb_old = WSConv2d(start_channel_dim, self.image_channels, 1, 0)
 
         # Why double Sequential Parentheses?
         self.core_blocks = nn.Sequential(
             nn.Sequential(
                 WSLinear(self.latent_size, self.latent_size*4*4),
-                LatentReshape(self.latent_size),
-                conv_bn_relu(self.latent_size, self.latent_size, 3, 1)
+                LatentReshape(self.latent_size), # If we need reshape operation in the middle, we make that as a class inheriting nn.Module. Lesson learned.
+                conv_bn_relu(self.latent_size, self.latent_size, 3, 1) # Inputs nn.Sequential as a whole here.
             )
         )
 
@@ -41,14 +41,14 @@ class Generator(ProgressiveBaseModel):
         self.upsampling = UpSamplingBlock()
 
     def extend(self):
-        output_dim = self.transition_channels[self.transition_step]
+        output_dim = self.transition_channels[self.transition_step] # Pre-assigned resolution schedule. Keep track of transition_step.
         # Downsampling Module
         if self.transition_step == 0:
             core_blocks = nn.Sequential(
-                *self.core_blocks.children(), # WSLinear, LatentReshape, conv_bn_relu
+                *self.core_blocks.children(), # WSLinear(expand latent), LatentReshape, conv_bn_relu
                 UpsamplingBlock()
             )
-            self.core_blocks = core_blocks # Redefine Class Variable
+            self.core_blocks = core_blocks
         else: # If transition_step > 0:
             self.core_blocks = nn.Sequential(
                 *self.core_blocks.children(),
@@ -66,7 +66,7 @@ class Generator(ProgressiveBaseModel):
             conv_bn_relu(self.prev_channel_extension, output_dim, 3, 1),
             conv_bn_relu(output_dim, output_dim, 3, 1)
         )
-        super().extend() # It means extend on ProgressiveBaseModel? (The parent?)
+        super().extend() # execute "extend" method from parent(ProgressiveBaseModel)
 
     def new_paramters(self):
         new_parameters = list(self.new_blocks.parameters()) + list(self.to_rgb_new.parameters())
@@ -82,7 +82,7 @@ class Generator(ProgressiveBaseModel):
         x_new = self.new_blocks(x)
         x_new = self.to_rgb_new(x_new)
 
-        x = get_transition_value(x_old, x_new, self.transition_value) # From utils: Check what it does
+        x = get_transition_value(x_old, x_new, self.transition_value) # Linear Interpolation using torch.lerp / I guess this works as Fade In.
         return x
 
     def device(self):
