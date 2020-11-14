@@ -2,7 +2,6 @@
 
 ### Code Implementation of numerous papers.
 
-------------------- List -----------------------
 
 1. GAN
 2. WGAN
@@ -12,3 +11,5 @@
 6. Transformer (Attention is All You Need)
 7. Variational Auto-Encoder
 8. ProGAN
+9. Neural-style-transfer
+10. Adaptive Instance Normalization
