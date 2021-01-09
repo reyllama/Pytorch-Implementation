@@ -15,7 +15,7 @@ class ProgressiveBaseModel(nn.Module):
             start_channel_size // 32
         ]
 
-        self.transition_channels = [x // 8 * 8 for x in self.transition_channels] # 15 --> 8 // 16 --> 16 (8배수로 버림)
+        self.transition_channels = [x // 8 * 8 for x in self.transition_channels] # 15 --> 8, 16 --> 16 (8배수로 버림)
         self.image_channels = image_channels
         self.transition_value = 1.0 # Interpolation outputs 100% x_new if this value set to 1
         self.current_imsize = 4 # initial resolution
